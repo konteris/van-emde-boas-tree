@@ -19,7 +19,8 @@ public class Main {
         tree.insert(13);
         tree.insert(14);
         System.out.print(tree.successor(1));
-
+        System.out.print("\n");
+        System.out.print(tree.predecessor(7));
     }
 }
 

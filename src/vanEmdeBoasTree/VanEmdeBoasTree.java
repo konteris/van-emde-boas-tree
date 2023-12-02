@@ -78,6 +78,35 @@ public class VanEmdeBoasTree {
         return index(i, j);
     }
 
+    public long predecessor(long x) {
+        if (universeSize == 2) {
+            if (min != null && min < x)
+                return min;
+            return -1;
+        }
+        if (max != null && max < x)
+            return max;
+        long i = high(x);
+        long j = low(x);
+
+        VanEmdeBoasTree clusterOfX = this.clusters[(int) i];
+        if (clusterOfX.min != null && j > clusterOfX.min) {
+            j = clusterOfX.predecessor(low(x));
+            return index(i, j);
+        } else {
+            i = this.summary.predecessor(i);
+            if (i == -1) {
+                if (min != null && x > min)
+                    return min;
+                else
+                    return -1;
+            } else {
+                j = this.clusters[(int) i].max;
+                return index(i, j);
+            }
+        }
+    }
+
     private long high(long x) {
         return x / numberOfClusters;
     }
