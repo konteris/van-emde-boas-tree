@@ -21,34 +21,61 @@ public class VanEmdeBoasTree {
 
     public void insert(long x) {
         if (universeSize == 2) {
-            if (this.min == null)
-                this.min = this.max = x;
-            else {
-                if (x < this.min)
-                    this.min = x;
-                else if (x > this.max)
-                    this.max = x;
+            if (min == null) {
+                min = x;
+                max = x;
+            } else {
+                if (x < min) {
+                    min = x;
+                } else if (x > max)
+                    max = x;
             }
             return;
         }
-        if (this.min == null) {
-            this.min = this.max = x;
+        if (min == null) {
+            min = x;
+            max = x;
             return;
         }
-        if (this.min > x) {
-            long temp = this.min;
-            this.min = x;
+        if (x < min) {
+            long temp = min;
+            min = x;
             x = temp;
         }
-        if (this.max < x)
-            this.max = x;
+        if (x > max)
+            max = x;
+
         long clusterToInsert = high(x);
         long positionToInsert = low(x);
 
-        if (this.clusters[(int) clusterToInsert].min == null) // if cluster is empty
+        if (this.clusters[(int) clusterToInsert].min == null) { // if cluster is empty
             this.summary.insert(clusterToInsert);
-        else
-            this.clusters[(int) clusterToInsert].insert(positionToInsert);
+        }
+        this.clusters[(int) clusterToInsert].insert(positionToInsert);
+    }
+
+    public long successor(long x) {
+        if (universeSize == 2) {
+            if (max != null && x < max)
+                return max;
+            return -1;
+        }
+        if (min != null && x < min) {
+            return min;
+        }
+        long i = high(x);
+        long j = low(x);
+        VanEmdeBoasTree clusterOfX = this.clusters[(int) i];
+
+        if (clusterOfX.max != null && j < clusterOfX.max) {
+            j = clusterOfX.successor((int) low(x));
+        } else {
+            i = this.summary.successor(i);
+            if (i == -1)
+                return -1;
+            j = this.clusters[(int) i].min;
+        }
+        return index(i, j);
     }
 
     private long high(long x) {
@@ -60,6 +87,8 @@ public class VanEmdeBoasTree {
     }
 
     private long index(long i, long j) {
+        if (i == -1 || j == -1)
+            return -1;
         return i * numberOfClusters + j;
     }
 
