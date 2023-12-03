@@ -13,9 +13,9 @@ public class VanEmdeBoasTree {
         if (universeSize > 2) {
             this.numberOfClusters = (long) Math.sqrt(universeSize);
             this.summary = new VanEmdeBoasTree(numberOfClusters);
-            this.clusters = new vanEmdeBoasTree.VanEmdeBoasTree[(int) numberOfClusters];
+            this.clusters = new VanEmdeBoasTree[(int) numberOfClusters];
             for (long i = 0; i < numberOfClusters; i++)
-                this.clusters[(int) i] = new vanEmdeBoasTree.VanEmdeBoasTree(numberOfClusters);
+                this.clusters[(int) i] = new VanEmdeBoasTree(numberOfClusters);
         }
     }
 
@@ -190,32 +190,5 @@ public class VanEmdeBoasTree {
             return -1;
         return i * numberOfClusters + j;
     }
-
-    public void printTree() {
-        printTree(this, 0, "");
-    }
-
-    private void printTree(VanEmdeBoasTree tree, int depth, String indent) {
-        if (tree == null) {
-            return;
-        }
-
-        for (long i = 0; i < tree.numberOfClusters; i++) {
-            printTree(tree.clusters[(int) i], depth + 1, indent + "  |");
-        }
-
-        if (depth == 0) {
-            if (tree.min != null) {
-                System.out.println(indent + "Min: " + tree.min);
-            }
-
-            if (tree.max != null) {
-                System.out.println(indent + "Max: " + tree.max);
-            }
-        } else {
-            System.out.println(indent + String.valueOf(tree.min));
-        }
-    }
-
 
 }
