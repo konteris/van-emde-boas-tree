@@ -1,7 +1,9 @@
 package vanEmdeBoasTree;
 
+import java.util.HashMap;
+
 public class VanEmdeBoasTree {
-    private VanEmdeBoasTree clusters[];
+    private HashMap<Long, VanEmdeBoasTree> clusters;
     private VanEmdeBoasTree summary;
     private Long min;
     private Long max;
@@ -13,26 +15,20 @@ public class VanEmdeBoasTree {
         if (universeSize > 2) {
             this.numberOfClusters = (long) Math.sqrt(universeSize);
             this.summary = new VanEmdeBoasTree(numberOfClusters);
-            this.clusters = new VanEmdeBoasTree[(int) numberOfClusters];
-            for (long i = 0; i < numberOfClusters; i++)
-                this.clusters[(int) i] = new VanEmdeBoasTree(numberOfClusters);
+            this.clusters = new HashMap<>();
         }
     }
 
     public boolean contains(long x) {
-        if (x >= universeSize)
-            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
         if (this.min != null && this.max != null && (x == this.min || x == this.max))
             return true;
         else if (this.universeSize == 2)
             return false;
         else
-            return this.clusters[(int) high(x)].contains(low(x));
+            return this.clusters.get(high(x)).contains(low(x));
     }
 
     public void insert(long x) {
-        if (x >= universeSize)
-            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
         if (universeSize == 2) {
             if (min == null) {
                 min = x;
@@ -61,34 +57,43 @@ public class VanEmdeBoasTree {
         long clusterToInsert = high(x);
         long positionToInsert = low(x);
 
-        if (this.clusters[(int) clusterToInsert].min == null) { // if cluster is empty
-            this.summary.insert(clusterToInsert);
+        if (!this.clusters.containsKey(clusterToInsert)) {
+            this.clusters.put(clusterToInsert, new VanEmdeBoasTree(numberOfClusters));
         }
-        this.clusters[(int) clusterToInsert].insert(positionToInsert);
+        if (this.clusters.get(clusterToInsert).min == null) { // if cluster is empty - this.clusters[(int) clusterToInsert].min == null
+            this.summary.insert(clusterToInsert); // updatinu summary struktura
+        }
+        this.clusters.get(clusterToInsert).insert(positionToInsert); // insertinu i atitinkama clusterio pozicija
     }
 
     public long successor(long x) {
-        if (x >= universeSize)
-            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
         if (universeSize == 2) {
-            if (max != null && x < max)
+            if (max != null && x < max) {
                 return max;
+            }
             return -1;
         }
-        if (min != null && x < min) {
+        if (this.min == null) {
+            return -1;
+        }
+        if (x < min) {
             return min;
         }
         long i = high(x);
         long j = low(x);
-        VanEmdeBoasTree clusterOfX = this.clusters[(int) i];
 
-        if (clusterOfX.max != null && j < clusterOfX.max) {
-            j = clusterOfX.successor((int) low(x));
+        VanEmdeBoasTree clusterOfX = null;
+        if (this.clusters.containsKey(i)) {
+            clusterOfX = this.clusters.get(i);
+        }
+
+        if (clusterOfX != null && clusterOfX.max != null && j < clusterOfX.max) {
+            j = clusterOfX.successor(j);
         } else {
             i = this.summary.successor(i);
             if (i == -1)
                 return -1;
-            j = this.clusters[(int) i].min;
+            j = this.clusters.get(i).min;
         }
         return index(i, j);
     }
@@ -99,14 +104,18 @@ public class VanEmdeBoasTree {
                 return min;
             return -1;
         }
+
         if (max != null && max < x)
             return max;
+
         long i = high(x);
         long j = low(x);
 
-        VanEmdeBoasTree clusterOfX = this.clusters[(int) i];
-        if (clusterOfX.min != null && j > clusterOfX.min) {
-            j = clusterOfX.predecessor(low(x));
+        VanEmdeBoasTree clusterOfX = null;
+        clusterOfX = this.clusters.get(i);
+
+        if (clusterOfX != null && clusterOfX.min != null && j > clusterOfX.min) {
+            j = clusterOfX.predecessor(j);
             return index(i, j);
         } else {
             i = this.summary.predecessor(i);
@@ -116,15 +125,13 @@ public class VanEmdeBoasTree {
                 else
                     return -1;
             } else {
-                j = this.clusters[(int) i].max;
+                j = this.clusters.get(i).max;
                 return index(i, j);
             }
         }
     }
 
     public void delete(long x) {
-        if (x >= universeSize)
-            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
         if (universeSize == 2) {
             if (this.min != null) {
                 if (this.min.longValue() == this.max.longValue()) {
@@ -148,14 +155,14 @@ public class VanEmdeBoasTree {
                 return;
             } else {
                 long minIndex = this.summary.min;
-                long minValue = this.clusters[(int) minIndex].min;
+                long minValue = this.clusters.get(minIndex).min;
                 this.min = index(minIndex, minValue);
                 x = min;
             }
         }
 
         long indexOfClusterToDeleteXFrom = high(x);
-        VanEmdeBoasTree clusterToDeleteXFrom = clusters[(int) indexOfClusterToDeleteXFrom];
+        VanEmdeBoasTree clusterToDeleteXFrom = clusters.get(indexOfClusterToDeleteXFrom);
         long positionToDelete = low(x);
 
         clusterToDeleteXFrom.delete(positionToDelete);
@@ -170,7 +177,7 @@ public class VanEmdeBoasTree {
                     this.max = this.min;
             } else {
                 long indexMaxCluster = summary.max;
-                VanEmdeBoasTree maxCluster = clusters[(int) indexMaxCluster];
+                VanEmdeBoasTree maxCluster = clusters.get(indexMaxCluster);
                 this.max = index(indexMaxCluster, maxCluster.max);
             }
         }

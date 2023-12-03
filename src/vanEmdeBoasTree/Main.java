@@ -4,7 +4,7 @@ import vanEmdeBoasTree.VanEmdeBoasTree;
 
 public class Main {
     public static void main(String[] args) {
-        final long universeSize = 16;
+        final long universeSize = 65536;
         testInsert(universeSize);
     }
 
