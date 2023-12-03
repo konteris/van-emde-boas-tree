@@ -11,16 +11,19 @@ public class Main {
     private static void testInsert(long universeSize) {
         System.out.println("Testing insert method:");
         VanEmdeBoasTree tree = new VanEmdeBoasTree(universeSize);
-        tree.insert(6);
         tree.insert(5);
         tree.insert(7);
+        tree.insert(2);
+        tree.insert(3);
         tree.insert(4);
-        tree.insert(8);
-        tree.insert(13);
+        tree.insert(15);
         tree.insert(14);
-        System.out.print(tree.successor(1));
-        System.out.print("\n");
-        System.out.print(tree.predecessor(7));
+        tree.delete(7);
+        System.out.print(tree.predecessor(1000));
+//        System.out.print("\n");
+//        System.out.print(tree.predecessor(6));
+//        System.out.print("\n");
+        //System.out.print(tree.contains(5));
     }
 }
 

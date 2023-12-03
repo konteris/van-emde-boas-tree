@@ -19,7 +19,20 @@ public class VanEmdeBoasTree {
         }
     }
 
+    public boolean contains(long x) {
+        if (x >= universeSize)
+            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
+        if (this.min != null && this.max != null && (x == this.min || x == this.max))
+            return true;
+        else if (this.universeSize == 2)
+            return false;
+        else
+            return this.clusters[(int) high(x)].contains(low(x));
+    }
+
     public void insert(long x) {
+        if (x >= universeSize)
+            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
         if (universeSize == 2) {
             if (min == null) {
                 min = x;
@@ -55,6 +68,8 @@ public class VanEmdeBoasTree {
     }
 
     public long successor(long x) {
+        if (x >= universeSize)
+            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
         if (universeSize == 2) {
             if (max != null && x < max)
                 return max;
@@ -106,6 +121,61 @@ public class VanEmdeBoasTree {
             }
         }
     }
+
+    public void delete(long x) {
+        if (x >= universeSize)
+            throw new IllegalArgumentException("Element must be in the set of the universe {0, 1, 2, ..., u-1}");
+        if (universeSize == 2) {
+            if (this.min != null) {
+                if (this.min.longValue() == this.max.longValue()) {
+                    this.min = null;
+                    this.max = null;
+                } else {
+                    if (x == this.min) {
+                        this.min = this.max;
+                    } else {
+                        this.max = this.min;
+                    }
+                }
+            }
+            return;
+        }
+
+        if (x == min) {
+            if (this.summary.min == null) {
+                this.min = null;
+                this.max = null;
+                return;
+            } else {
+                long minIndex = this.summary.min;
+                long minValue = this.clusters[(int) minIndex].min;
+                this.min = index(minIndex, minValue);
+                x = min;
+            }
+        }
+
+        long indexOfClusterToDeleteXFrom = high(x);
+        VanEmdeBoasTree clusterToDeleteXFrom = clusters[(int) indexOfClusterToDeleteXFrom];
+        long positionToDelete = low(x);
+
+        clusterToDeleteXFrom.delete(positionToDelete);
+        if (clusterToDeleteXFrom.min == null) {
+            summary.delete(indexOfClusterToDeleteXFrom);
+        }
+
+        if (x == this.max) {
+            if (summary.max == null) {
+                this.max = null;
+                if (this.min != null)
+                    this.max = this.min;
+            } else {
+                long indexMaxCluster = summary.max;
+                VanEmdeBoasTree maxCluster = clusters[(int) indexMaxCluster];
+                this.max = index(indexMaxCluster, maxCluster.max);
+            }
+        }
+    }
+
 
     private long high(long x) {
         return x / numberOfClusters;
